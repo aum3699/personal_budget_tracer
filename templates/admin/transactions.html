@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Transactions - Personal Budget Tracker{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">🔧 Admin - All Transactions</h2>
+
+<!-- Admin Navigation -->
+<nav class="nav nav-pills mb-4">
+    <a class="nav-link" href="{% url 'admin_dashboard' %}">Dashboard</a>
+    <a class="nav-link" href="{% url 'admin_users' %}">Users</a>
+    <a class="nav-link active" href="{% url 'admin_transactions' %}">All Transactions</a>
+</nav>
+
+<!-- Summary -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5>Total Income</h5>
+                <h3>{{ currency_symbol }}{{ total_income|floatformat:2 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h5>Total Expenses</h5>
+                <h3>{{ currency_symbol }}{{ total_expense|floatformat:2 }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for txn in page_obj %}
+                    <tr>
+                        <td>{{ txn.id }}</td>
+                        <td>{{ txn.date|date:"Y-m-d" }}</td>
+                        <td><a href="{% url 'admin_user_detail' txn.user.id %}">{{ txn.user.username }}</a></td>
+                        <td>
+                            {% if txn.type == 'Income' %}
+                            <span class="badge bg-success">{{ txn.type }}</span>
+                            {% else %}
+                            <span class="badge bg-danger">{{ txn.type }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ txn.category }}</td>
+                        <td>{{ currency_symbol }}{{ txn.amount|floatformat:2 }}</td>
+                        <td>{{ txn.note }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

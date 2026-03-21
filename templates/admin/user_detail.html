@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin - User Detail{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">🔧 Admin - User: {{ user.username }}</h2>
+
+<!-- Admin Navigation -->
+<nav class="nav nav-pills mb-4">
+    <a class="nav-link" href="{% url 'admin_dashboard' %}">Dashboard</a>
+    <a class="nav-link" href="{% url 'admin_users' %}">Users</a>
+    <a class="nav-link" href="{% url 'admin_transactions' %}">All Transactions</a>
+</nav>
+
+<!-- User Info -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">User Information</h5>
+    </div>
+    <div class="card-body">
+        <p><strong>Username:</strong> {{ user.username }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Date Joined:</strong> {{ user.date_joined|date:"Y-m-d" }}</p>
+        <p><strong>Admin:</strong> 
+            {% if user.profile.is_admin %}
+            <span class="badge bg-success">Yes</span>
+            {% else %}
+            <span class="badge bg-secondary">No</span>
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<!-- Summary -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5>Total Income</h5>
+                <h3>{{ currency_symbol }}{{ total_income|floatformat:2 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h5>Total Expenses</h5>
+                <h3>{{ currency_symbol }}{{ total_expense|floatformat:2 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5>Balance</h5>
+                <h3>{{ currency_symbol }}{{ balance|floatformat:2 }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transactions -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">User Transactions</h5>
+    </div>
+    <div class="card-body">
+        {% if transactions %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for txn in transactions %}
+                    <tr>
+                        <td>{{ txn.date|date:"Y-m-d" }}</td>
+                        <td>
+                            {% if txn.type == 'Income' %}
+                            <span class="badge bg-success">{{ txn.type }}</span>
+                            {% else %}
+                            <span class="badge bg-danger">{{ txn.type }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ txn.category }}</td>
+                        <td>{{ currency_symbol }}{{ txn.amount|floatformat:2 }}</td>
+                        <td>{{ txn.note }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No transactions found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

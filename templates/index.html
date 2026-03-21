@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Personal Budget Tracker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Summary Cards -->
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Income</h5>
+                <h2>{{ currency_symbol }}{{ income|floatformat:2 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Expenses</h5>
+                <h2>{{ currency_symbol }}{{ expense|floatformat:2 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Balance</h5>
+                <h2>{{ currency_symbol }}{{ balance|floatformat:2 }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Add Transaction Form -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Add Transaction</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="add_transaction" value="1">
+                    <div class="mb-3">
+                        <label for="id_type" class="form-label">Type</label>
+                        <select name="type" class="form-control" id="id_type">
+                            <option value="Income">Income</option>
+                            <option value="Expense">Expense</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_category" class="form-label">Category</label>
+                        <input type="text" name="category" class="form-control" id="id_category" placeholder="Category" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_amount" class="form-label">Amount</label>
+                        <input type="number" name="amount" class="form-control" id="id_amount" placeholder="Amount" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_note" class="form-label">Note</label>
+                        <input type="text" name="note" class="form-control" id="id_note" placeholder="Note (optional)">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Add Transaction</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter and Transactions -->
+    <div class="col-md-8">
+        <!-- Month Filter -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="id_month" class="form-label">Month</label>
+                        <select name="month" class="form-control" id="id_month">
+                            <option value="01" {% if current_month == '01' %}selected{% endif %}>January</option>
+                            <option value="02" {% if current_month == '02' %}selected{% endif %}>February</option>
+                            <option value="03" {% if current_month == '03' %}selected{% endif %}>March</option>
+                            <option value="04" {% if current_month == '04' %}selected{% endif %}>April</option>
+                            <option value="05" {% if current_month == '05' %}selected{% endif %}>May</option>
+                            <option value="06" {% if current_month == '06' %}selected{% endif %}>June</option>
+                            <option value="07" {% if current_month == '07' %}selected{% endif %}>July</option>
+                            <option value="08" {% if current_month == '08' %}selected{% endif %}>August</option>
+                            <option value="09" {% if current_month == '09' %}selected{% endif %}>September</option>
+                            <option value="10" {% if current_month == '10' %}selected{% endif %}>October</option>
+                            <option value="11" {% if current_month == '11' %}selected{% endif %}>November</option>
+                            <option value="12" {% if current_month == '12' %}selected{% endif %}>December</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_year" class="form-label">Year</label>
+                        <select name="year" class="form-control" id="id_year">
+                            {% for y in filter_form.year.field.choices %}
+                            <option value="{{ y.0 }}" {% if current_year == y.0 %}selected{% endif %}>{{ y.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-secondary me-2">Filter</button>
+                        <a href="{% url 'export_csv' %}?month={{ current_month }}&year={{ current_year }}" class="btn btn-success">Export CSV</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Transactions</h5>
+            </div>
+            <div class="card-body">
+                {% if transactions %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Note</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for txn in transactions %}
+                            <tr>
+                                <td>{{ txn.date|date:"Y-m-d" }}</td>
+                                <td>
+                                    {% if txn.type == 'Income' %}
+                                    <span class="badge bg-success">{{ txn.type }}</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">{{ txn.type }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ txn.category }}</td>
+                                <td>{{ currency_symbol }}{{ txn.amount|floatformat:2 }}</td>
+                                <td>{{ txn.note }}</td>
+                                <td>
+                                    <a href="{% url 'edit_transaction' txn.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="{% url 'delete_transaction' txn.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center text-muted">No transactions found for this month.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

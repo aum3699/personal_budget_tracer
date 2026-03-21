@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - Personal Budget Tracker{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">🔧 Admin Dashboard</h2>
+
+<!-- Admin Navigation -->
+<nav class="nav nav-pills mb-4">
+    <a class="nav-link active" href="{% url 'admin_dashboard' %}">Dashboard</a>
+    <a class="nav-link" href="{% url 'admin_users' %}">Users</a>
+    <a class="nav-link" href="{% url 'admin_transactions' %}">All Transactions</a>
+</nav>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Users</h5>
+                <h2>{{ total_users }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Transactions</h5>
+                <h2>{{ total_transactions }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Income</h5>
+                <h2>{{ currency_symbol }}{{ total_income|floatformat:2 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Expenses</h5>
+                <h2>{{ currency_symbol }}{{ total_expense|floatformat:2 }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Transactions -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Recent Transactions</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for txn in recent_transactions %}
+                    <tr>
+                        <td>{{ txn.date|date:"Y-m-d" }}</td>
+                        <td>{{ txn.user.username }}</td>
+                        <td>
+                            {% if txn.type == 'Income' %}
+                            <span class="badge bg-success">{{ txn.type }}</span>
+                            {% else %}
+                            <span class="badge bg-danger">{{ txn.type }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ txn.category }}</td>
+                        <td>{{ currency_symbol }}{{ txn.amount|floatformat:2 }}</td>
+                        <td>{{ txn.note }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- User Stats -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">User Statistics</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Transactions</th>
+                        <th>Income</th>
+                        <th>Expenses</th>
+                        <th>Balance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in user_stats %}
+                    <tr>
+                        <td>{{ stat.user.username }}</td>
+                        <td>{{ stat.user.email }}</td>
+                        <td>{{ stat.transaction_count }}</td>
+                        <td>{{ currency_symbol }}{{ stat.total_income|floatformat:2 }}</td>
+                        <td>{{ currency_symbol }}{{ stat.total_expense|floatformat:2 }}</td>
+                        <td>
+                            {% if stat.balance >= 0 %}
+                            <span class="text-success">{{ currency_symbol }}{{ stat.balance|floatformat:2 }}</span>
+                            {% else %}
+                            <span class="text-danger">{{ currency_symbol }}{{ stat.balance|floatformat:2 }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'admin_user_detail' stat.user.id %}" class="btn btn-sm btn-info">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
