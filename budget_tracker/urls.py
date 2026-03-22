@@ -3,21 +3,25 @@ URL configuration for budget_tracker project.
 
 The `urlpatterns` list routes URLs to views.
 """
+import os
+import logging
 from django.urls import path, include
 from django.contrib import admin
 from django.http import HttpResponse
 
-def test_db(request):
-    from django.db import connection
+logger = logging.getLogger(__name__)
+
+def test_error(request):
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT 1")
-        return HttpResponse("Database OK!")
+        from django.conf import settings
+        db_url = os.environ.get('DATABASE_URL', 'NOT SET')
+        return HttpResponse(f"DEBUG={settings.DEBUG}<br>DATABASE_URL={db_url[:50]}...")
     except Exception as e:
-        return HttpResponse(f"Database Error: {str(e)}", status=500)
+        import traceback
+        return HttpResponse(f"Error: {str(e)}<br>{traceback.format_exc()}", status=500)
 
 urlpatterns = [
-    path('test-db/', test_db, name='test_db'),
+    path('test-error/', test_error, name='test_error'),
     path('', include('budget.urls')),
     path('admin/', admin.site.urls),
 ]
