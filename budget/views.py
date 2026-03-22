@@ -116,7 +116,10 @@ def export_csv(request):
     return response
 
 def check_admin(request):
-    return hasattr(request.user, 'profile') and request.user.profile.is_admin
+    if not request.user.is_authenticated:
+        return False
+    profile, _ = UserProfile.objects.get_or_create(user=request.user, defaults={'is_admin': False})
+    return profile.is_admin
 
 @login_required
 def admin_dashboard(request):
@@ -188,7 +191,8 @@ def make_admin(request, user_id):
     if not check_admin(request):
         messages.error(request, 'Admin only!')
         return redirect('index')
-    profile = get_object_or_404(UserProfile, user_id=user_id)
+    user = get_object_or_404(User, id=user_id)
+    profile, _ = UserProfile.objects.get_or_create(user=user, defaults={'is_admin': False})
     profile.is_admin = True
     profile.save()
     messages.success(request, 'Made admin!')
@@ -202,7 +206,8 @@ def remove_admin(request, user_id):
     if user_id == request.user.id:
         messages.error(request, 'Cannot remove yourself!')
         return redirect('admin_users')
-    profile = get_object_or_404(UserProfile, user_id=user_id)
+    user = get_object_or_404(User, id=user_id)
+    profile, _ = UserProfile.objects.get_or_create(user=user, defaults={'is_admin': False})
     profile.is_admin = False
     profile.save()
     messages.success(request, 'Removed admin!')
