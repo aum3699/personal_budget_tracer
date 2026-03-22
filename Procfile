@@ -1,2 +1,2 @@
 release: python manage.py migrate
-web: gunicorn budget_tracker.wsgi
+web: python manage.py migrate && gunicorn budget_tracker.wsgi

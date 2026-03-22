@@ -50,7 +50,9 @@ def register(request):
                 UserProfile.objects.create(user=user, is_admin=False)
                 messages.success(request, 'Registered! Login now.')
                 return redirect('login')
-    return render(request, 'register.html', {'form': RegistrationForm()})
+    else:
+        form = RegistrationForm()
+    return render(request, 'register.html', {'form': form})
 
 @login_required
 def index(request):
