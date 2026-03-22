@@ -33,6 +33,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
+# Trust Referer header for CSRF
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com', 'https://personal-budget-tracer.onrender.com']
+
 ROOT_URLCONF = 'budget_tracker.urls'
 
 TEMPLATES = [
