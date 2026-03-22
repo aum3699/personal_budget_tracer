@@ -11,17 +11,18 @@ from django.http import HttpResponse
 
 logger = logging.getLogger(__name__)
 
-def test_error(request):
-    try:
-        from django.conf import settings
-        db_url = os.environ.get('DATABASE_URL', 'NOT SET')
-        return HttpResponse(f"DEBUG={settings.DEBUG}<br>DATABASE_URL={db_url[:50]}...")
-    except Exception as e:
-        import traceback
-        return HttpResponse(f"Error: {str(e)}<br>{traceback.format_exc()}", status=500)
+def simple_test(request):
+    return HttpResponse("App is working!")
+
+def db_test(request):
+    from django.db import connection
+    cursor = connection.cursor()
+    cursor.execute("SELECT 1")
+    return HttpResponse("Database OK!")
 
 urlpatterns = [
-    path('test-error/', test_error, name='test_error'),
+    path('test/', simple_test, name='simple_test'),
+    path('db-test/', db_test, name='db_test'),
     path('', include('budget.urls')),
     path('admin/', admin.site.urls),
 ]
