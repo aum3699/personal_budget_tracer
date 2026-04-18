@@ -87,6 +87,12 @@ DATABASES = {
     )
 }
 
+# Log database info on startup (for debugging)
+if os.environ.get('DATABASE_URL'):
+    print(f"📊 Using DATABASE_URL: {os.environ['DATABASE_URL'][:30]}...")
+else:
+    print("⚠️  No DATABASE_URL set, using sqlite")
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
 ]
