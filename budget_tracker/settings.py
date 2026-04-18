@@ -19,14 +19,16 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-this-in-produc
 
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["personal-budget-tracer.onrender.com"]
 
-if not DEBUG:
-    ALLOWED_HOSTS = ['.onrender.com', 'personal-budget-tracer.onrender.com']
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-CSRF_TRUSTED_ORIGINS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    "https://personal-budget-tracer.onrender.com"
+]
 
 # Always allow CSRF for now (can tighten in production if needed)
 CSRF_COOKIE_SECURE = False
