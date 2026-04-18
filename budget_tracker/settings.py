@@ -6,7 +6,9 @@ import dj_database_url
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / '.env')
+env_path = BASE_DIR / '.env'
+if env_path.exists():
+    load_dotenv(env_path)
 
 
 def get_csv_env(name, default):
@@ -18,6 +20,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-this-in-produc
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = ['*']
+
+if not DEBUG:
+    ALLOWED_HOSTS = ['.onrender.com', 'personal-budget-tracer.onrender.com']
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
