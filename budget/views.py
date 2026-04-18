@@ -18,15 +18,15 @@ CURRENCY = '₹'
 def user_login(request):
     if request.user.is_authenticated:
         return redirect('index')
+    form = LoginForm(request.POST or None)
     if request.method == 'POST':
-        form = LoginForm(request.POST)
         if form.is_valid():
             user = authenticate(request, username=form.cleaned_data['username'], password=form.cleaned_data['password'])
             if user:
                 login(request, user)
                 return redirect(request.GET.get('next', 'index'))
-            messages.error(request, 'Invalid credentials')
-    return render(request, 'login.html', {'form': LoginForm()})
+            form.add_error(None, 'Invalid username or password')
+    return render(request, 'login.html', {'form': form})
 
 def user_logout(request):
     logout(request)
@@ -36,22 +36,14 @@ def user_logout(request):
 def register(request):
     if request.user.is_authenticated:
         return redirect('index')
+    form = RegistrationForm(request.POST or None)
     if request.method == 'POST':
-        form = RegistrationForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
-            email = form.cleaned_data['email']
-            if User.objects.filter(username=username).exists():
-                messages.error(request, 'Username exists')
-            elif User.objects.filter(email=email).exists():
-                messages.error(request, 'Email exists')
-            else:
-                user = form.save()
-                UserProfile.objects.create(user=user, is_admin=False)
-                messages.success(request, 'Registered! Login now.')
-                return redirect('login')
-    else:
-        form = RegistrationForm()
+            user = form.save()
+            messages.success(request, 'Registration successful! Please login.')
+            return redirect('login')
+        else:
+            messages.error(request, 'Please fix the errors below.')
     return render(request, 'register.html', {'form': form})
 
 @login_required
